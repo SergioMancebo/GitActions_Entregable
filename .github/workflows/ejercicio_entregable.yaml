@@ -20,20 +20,17 @@ jobs:
 
       - name: Validar archivo ventas.json
         run: |
-          echo "Validando archivo JSON..."          
-          python3 -m json.tool ventas.json > /dev/null 
+          echo "Validando archivo JSON..."
+          python3 -m json.tool ventas.json > /dev/null
           echo "El archivo ventas.json es un JSON válido."
         # El módulo nativo json.tool de Python comprueba que ventas.json
         # está bien escrito (comillas cerradas, llaves correctas, etc.).
-
         # Añadimos > /dev/null para evitar ensuciar la consola,
         # ya que json.tool imprime todo el archivo si es válido.
-      
-    
+
       - name: Escaneo de seguridad (Claves API expuestas)
         if: ${{ inputs.test_seguridad }}
         run: python3 security_scan.py
-
 
   procesamiento:
     name: "Job 2: Procesar Ventas (${{ matrix.environment }})"
@@ -72,10 +69,12 @@ jobs:
           name: reporte-ventas-${{ matrix.environment }}
           path: reporte_${{ matrix.environment }}.txt
 
-
   notificacion_exito:
+    name: "Job 3: Notificación de Éxito"
+    needs: [ci_seguridad, procesamiento]
+    runs-on: ubuntu-latest
     steps:
-      - name: Job 3:Simulación enviar notificación
+      - name: Simulación enviar notificación
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
